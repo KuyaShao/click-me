@@ -37,6 +37,28 @@ to open postgres database just open chrome type localhost:9001 after that you ne
     - password root
 - click save
 
+## Ports that has been used 
+All ports that has been used in this app
+
+- 9001 = pgadmin
+- 5432 = postgres
+- 8085 = nginx
+- 8026 = react app/frontend
+- 9000 = laravel app/backend
+
+To see all the details about ports just type docker ps.
+
+## Settings
+All settings that has been used or modified in this app was
+
+- make data = to create an table and run database seeder/run php artisan migrate and php artisan db:seed
+- make fresh-data = to reset all the tables/run php artisan migrate:fresh
+- make composer-update = to install/update all the dependencies of laravel
+- make up = to up/run docker-compose file
+- make stop = to stop docker-compose file
+- make build = to build docker-compose file
+- make setup = to run make buid make up and make composer-update at once
+
 
 
 
