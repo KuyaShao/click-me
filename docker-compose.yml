@@ -1,0 +1,86 @@
+version: '3.8'
+
+networks:
+  click-me:
+
+services:
+  frontend-dev:
+    container_name: frontend-react
+    build:
+      context: ./
+      dockerfile: ./frontend/Dockerfile
+    volumes:
+      - ./frontend/react-app:/app
+    ports:
+      - "8026:8026"
+    networks:
+      - click-me
+
+  backend-dev:
+    container_name: clickme-laravel
+    build:
+      context: ./
+      dockerfile: ./backend/Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    volumes:
+      - ./backend/laravel-app:/var/www/html:delegated
+    networks:
+      - click-me
+
+  web-server:
+    container_name: webserver-nginx
+    build:
+      context: ./
+      dockerfile: ./nginx/Dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    ports:
+      - "8085:80"
+    volumes:
+      - ./backend/laravel-app:/var/www/html:delegated
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend-dev
+      - redis
+      - postgres
+    networks:
+      - click-me
+      
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "6380:6380"
+    networks:
+      - click-me
+
+  postgres:
+    image: postgres:12.3-alpine
+    container_name: postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: click-me
+      POSTGRES_HOST_AUTH_METHOD: "trust"
+    networks:
+      - click-me
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "9001:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    networks:
+      - click-me
